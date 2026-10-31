@@ -151,6 +151,23 @@ class SysPatchHelpers:
         #   'chflags nouchg /private/var/folders/*/*/*/WindowServer'
 
 
+    def enable_window_server_caching(self):
+        """
+        Re-enable WindowServer's asset caching
+
+        Legacy GCN no longer needs the cache disabled, as the
+        AMDRadeonX4000 kext now zero-fills new VRAM.
+        Clear the write lock set by older patcher versions.
+        """
+
+        if self.constants.detected_os < os_data.os_data.ventura:
+            return
+
+        logging.info("Enabling WindowServer Caching")
+        # Invoke via 'bash -c' to resolve pathing
+        subprocess_wrapper.run_as_root(["/bin/bash", "-c", "/usr/bin/chflags nouchg /private/var/folders/*/*/*/WindowServer"])
+
+
     def install_rsr_repair_binary(self):
         """
         Installs RSRRepair
