@@ -192,6 +192,7 @@ class PatchSysVolume:
         self._clean_skylight_plugins()
         self._delete_nonmetal_enforcement()
         self._delete_nonmetal_defaults()
+        self._delete_gva_preferences()
 
         kernelcache.KernelCacheSupport(
             mount_location_data=self.mount_location_data,
@@ -312,6 +313,17 @@ class PatchSysVolume:
             if result in ["0", "false", "1", "true"]:
                 logging.info(f"- Removing non-Metal Enforcement Preference: {arg}")
                 subprocess_wrapper.run_as_root(["/usr/bin/defaults", "delete", "/Library/Preferences/com.apple.CoreDisplay", arg])
+
+
+    def _delete_gva_preferences(self) -> None:
+        """
+        Remove AppleGVA hardware decode override (MacPro6,1)
+        """
+
+        result = subprocess.run(["/usr/bin/defaults", "read", "/Library/Preferences/com.apple.AppleGVA", "allowNonTT"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode("utf-8").strip()
+        if result in ["0", "false", "1", "true"]:
+            logging.info("- Removing AppleGVA Preference: allowNonTT")
+            subprocess_wrapper.run_as_root(["/usr/bin/defaults", "delete", "/Library/Preferences/com.apple.AppleGVA", "allowNonTT"])
 
 
     def _delete_nonmetal_defaults(self) -> None:
@@ -556,6 +568,7 @@ class PatchSysVolume:
         # Make sure non-Metal Enforcement preferences are not present
         self._delete_nonmetal_enforcement()
         self._delete_nonmetal_defaults()
+        self._delete_gva_preferences()
 
         # Make sure we clean old kexts in /L*/E* that are not in the patchset
         kernelcache.KernelCacheSupport(

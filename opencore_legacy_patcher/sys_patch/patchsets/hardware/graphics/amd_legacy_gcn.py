@@ -110,6 +110,12 @@ class AMDLegacyGCN(BaseHardware):
                         "AMDShared.bundle":              "12.5-GCN-25" if self._xnu_major >= os_data.tahoe else "12.5",
                     },
                 },
+                # MacPro6,1: AppleGVA limits hardware decode to FairPlay content (TTOnly) on this board-id
+                **({
+                    PatchType.EXECUTE: {
+                        "/usr/bin/defaults write /Library/Preferences/com.apple.AppleGVA allowNonTT -boolean yes": True,
+                    },
+                } if self._computer.reported_board_id == "Mac-F60DEB81FF30ACF6" else {}),
             },
         }
 
